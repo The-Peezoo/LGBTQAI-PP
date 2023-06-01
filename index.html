@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profilbild Generator by Peezoo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        input, select, button {
+            margin: 10px;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        function generateProfilePicture() {
+            var userImage = document.getElementById('userImage').files[0];
+            var backgroundImage = document.getElementById('backgroundImage').value;
+
+            if (userImage && backgroundImage) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var userImg = new Image();
+                    userImg.onload = function() {
+                        var bgImg = new Image();
+                        bgImg.onload = function() {
+                            var size = Math.min(bgImg.width, bgImg.height);
+                            var userSize;
+
+                            if (backgroundImage === 'square') {
+                                userSize = size * 0.6; // Benutzerbildgröße auf 60% des Hintergrundbildes festlegen
+                            } else {
+                                userSize = size * 0.75; // Benutzerbildgröße auf 75% des Hintergrundbildes festlegen
+                            }
+
+                            var canvasSquare = document.createElement('canvas');
+                            var canvasOriginal = document.createElement('canvas');
+                            var contextSquare = canvasSquare.getContext('2d');
+                            var contextOriginal = canvasOriginal.getContext('2d');
+                            canvasSquare.width = size;
+                            canvasSquare.height = size;
+                            canvasOriginal.width = bgImg.width;
+                            canvasOriginal.height = bgImg.height;
+
+                            // Quadratisches Hintergrundbild zeichnen
+                            contextSquare.drawImage(bgImg, 0, 0, size, size);
+
+                            // Benutzerbild auf quadratischem Hintergrundbild zeichnen
+                            contextSquare.beginPath();
+                            contextSquare.arc(size / 2, size / 2, userSize / 2, 0, 2 * Math.PI);
+                            contextSquare.closePath();
+                            contextSquare.clip();
+                            contextSquare.drawImage(userImg, (size - userSize) / 2, (size - userSize) / 2, userSize, userSize);
+
+                            // Original-Hintergrundbild zeichnen
+                            contextOriginal.drawImage(bgImg, 0, 0, bgImg.width, bgImg.height);
+
+                            // Benutzerbild auf Original-Hintergrundbild zeichnen
+                            contextOriginal.beginPath();
+                            contextOriginal.arc(bgImg.width / 2, bgImg.height / 2, userSize / 2, 0, 2 * Math.PI);
+                            contextOriginal.closePath();
+                            contextOriginal.clip();
+                            contextOriginal.drawImage(userImg, (bgImg.width - userSize) / 2, (bgImg.height - userSize) / 2, userSize, userSize);
+
+                            showResult(canvasSquare, canvasOriginal);
+                        };
+                        bgImg.src = './LGBTQAI.jpg';
+                    };
+                    userImg.src = e.target.result;
+                };
+                reader.readAsDataURL(userImage);
+            }
+        }
+
+        function showResult(canvasSquare, canvasOriginal) {
+            var result = document.getElementById('result');
+            result.innerHTML = '';
+
+            var divSquare = document.createElement('div');
+            var divOriginal = document.createElement('div');
+            divSquare.innerHTML = '<h3>Quadratisches Seitenverhältnis</h3>';
+            divOriginal.innerHTML = '<h3>Unverändertes Seitenverhältnis</h3>';
+            divSquare.appendChild(canvasSquare);
+            divOriginal.appendChild(canvasOriginal);
+            result.appendChild(divSquare);
+            result.appendChild(divOriginal);
+
+            var downloadLinkSquare = document.createElement('a');
+            downloadLinkSquare.href = canvasSquare.toDataURL('image/png');
+            downloadLinkSquare.download = 'profilbild_quadratisch.png';
+            downloadLinkSquare.innerHTML = 'Bild mit quadratischem Seitenverhältnis herunterladen';
+            var downloadLinkOriginal = document.createElement('a');
+            downloadLinkOriginal.href = canvasOriginal.toDataURL('image/png');
+            downloadLinkOriginal.download = 'profilbild_unveraendert.png';
+            downloadLinkOriginal.innerHTML = 'Bild mit unverändertem Seitenverhältnis herunterladen';
+            result.appendChild(downloadLinkSquare);
+            result.appendChild(downloadLinkOriginal);
+        }
+    </script>
+</head>
+<body>
+    <h1>Profilbild Generator by <a href="https://twitter.com/Peezoo20">Peezoo</a></h1>
+    <br>
+    <h3>Create your profile picture combined with LGBTQAI+ flag</h3>
+    <input type="file" id="userImage" accept="image/*" />
+
+<select id="backgroundImage">
+        <option value="circle">LGBTQAI+</option> //this is not working
+        <option value="square">LGBTQAI+</option> //this is not working
+    </select>
+
+    
+    <button onclick="generateProfilePicture()">Profilbild generieren</button>
+    <h3>Kindly supported by <a href="https://twitter.com/MedeHurGmbH">MedeHurGmbH</a> and the LGBTQAI+ Movement.</h3>
+    
+    <div id="result"></div>
+</body>
+</html>
